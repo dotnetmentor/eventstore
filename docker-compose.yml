@@ -1,0 +1,62 @@
+version: '3'
+
+networks:
+  esnet:
+    driver: bridge
+    ipam:
+     config:
+       - subnet: 172.18.0.0/16
+
+services:
+  es-node1:
+    image: dotnetmentor/eventstore:latest
+    ports:
+      - "2113:2113/tcp"
+    networks:
+      esnet:
+        ipv4_address: 172.18.0.10
+        aliases: ['escluster.net']
+    environment:
+      EVENTSTORE_NODE_PRIORITY: 1
+      EVENTSTORE_RUN_PROJECTIONS: None
+      EVENTSTORE_EXT_IP: 172.18.0.10
+      EVENTSTORE_INT_IP: 172.18.0.10
+      EVENTSTORE_EXT_IP_ADVERTISE_AS: 172.18.0.10
+      EVENTSTORE_INT_IP_ADVERTISE_AS: 172.18.0.10
+      EVENTSTORE_CLUSTER_SIZE: 3
+      EVENTSTORE_CLUSTER_GOSSIP_PORT: 2112
+      EVENTSTORE_CLUSTER_DNS: escluster.net
+
+  es-node2:
+    image: dotnetmentor/eventstore:latest
+    networks:
+      esnet:
+        ipv4_address: 172.18.0.11
+        aliases: ['escluster.net']
+    environment:
+      EVENTSTORE_NODE_PRIORITY: 2
+      EVENTSTORE_RUN_PROJECTIONS: None
+      EVENTSTORE_EXT_IP: 172.18.0.11
+      EVENTSTORE_INT_IP: 172.18.0.11
+      EVENTSTORE_EXT_IP_ADVERTISE_AS: 172.18.0.11
+      EVENTSTORE_INT_IP_ADVERTISE_AS: 172.18.0.11
+      EVENTSTORE_CLUSTER_SIZE: 3
+      EVENTSTORE_CLUSTER_GOSSIP_PORT: 2112
+      EVENTSTORE_CLUSTER_DNS: escluster.net
+
+  es-node3:
+    image: dotnetmentor/eventstore:latest
+    networks:
+      esnet:
+        ipv4_address: 172.18.0.12
+        aliases: ['escluster.net']
+    environment:
+      EVENTSTORE_NODE_PRIORITY: 3
+      EVENTSTORE_RUN_PROJECTIONS: None
+      EVENTSTORE_EXT_IP: 172.18.0.12
+      EVENTSTORE_INT_IP: 172.18.0.12
+      EVENTSTORE_EXT_IP_ADVERTISE_AS: 172.18.0.12
+      EVENTSTORE_INT_IP_ADVERTISE_AS: 172.18.0.12
+      EVENTSTORE_CLUSTER_SIZE: 3
+      EVENTSTORE_CLUSTER_GOSSIP_PORT: 2112
+      EVENTSTORE_CLUSTER_DNS: escluster.net

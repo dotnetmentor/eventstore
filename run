@@ -1,0 +1,40 @@
+#!/usr/bin/env bash
+
+docker rm -f eventstore &>/dev/null || true
+docker build -t dotnetmentor/eventstore:latest .
+
+if [[ -f ./.env ]]; then
+  source ./.env
+fi
+
+test:restore() {
+  docker run -d \
+    --name eventstore \
+    -p 2113:2113 \
+    -e AWS_ACCESS_KEY_ID="${AWS_ACCESS_KEY_ID:?}" \
+    -e AWS_SECRET_ACCESS_KEY="${AWS_SECRET_ACCESS_KEY:?}" \
+    -e ES_UTILS_BACKUP_BUCKET="${ES_UTILS_BACKUP_BUCKET:?}" \
+    -e ES_UTILS_BACKUP_REGION="${ES_UTILS_BACKUP_REGION:?}" \
+    dotnetmentor/eventstore:latest
+
+  docker exec -it eventstore bash -c 'esutils restore'
+  docker restart eventstore
+}
+
+test:cluster() {
+  docker-compose up -d
+}
+
+main() {
+  local cmd="${1}"
+  if [[ "${cmd}" != "" ]]; then
+    shift
+  fi
+  case "${cmd}" in
+    restore) test:restore "$@" ;;
+    cluster) test:cluster "$@" ;;
+    *) echo 'Please specify a command as the first argument...' ;;
+  esac
+}
+
+main "$@"
